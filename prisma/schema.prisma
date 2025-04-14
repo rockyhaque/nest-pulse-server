@@ -38,6 +38,7 @@ enum UserRole {
 enum UserStatus {
   ACTIVE
   BLOCK
+  DELETED
 }
 
 //---------------------- Admin Table---------------------
