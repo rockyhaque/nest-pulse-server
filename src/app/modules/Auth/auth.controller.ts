@@ -21,6 +21,23 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
+const refreshToken = catchAsync(async (req, res) => {
+    const {refreshToken} = req.cookies;
+  const result = await authService.refreshToken(refreshToken);
+  
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Refresh Token API Called Successfully!",
+    data: result
+    // data: {
+    //   accessToken: result.accessToken,
+    //   needPasswordChange: result.needPasswordChange,
+    // },
+  });
+});
+
 export const authController = {
   loginUser,
+  refreshToken
 };
