@@ -2,12 +2,13 @@ import { UserStatus } from "@prisma/client";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import bcrypt from "bcryptjs";
+import config from "../../../config";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: payload.email,
-      status: UserStatus.ACTIVE
+      status: UserStatus.ACTIVE,
     },
   });
   const isCorrectPassword: boolean = await bcrypt.compare(
@@ -19,25 +20,13 @@ const loginUser = async (payload: { email: string; password: string }) => {
     throw new Error("Password incorrect!");
   }
 
-  //   const accessToken = jwt.sign(
-  //     {
-  //       email: userData.email,
-  //       role: userData.role,
-  //     },
-  //     "secretkey",
-  //     {
-  //       algorithm: "HS256",
-  //       expiresIn: "5m",
-  //     }
-  //   );
-
   const accessToken = jwtHelpers.generateToken(
     {
       email: userData.email,
       role: userData.role,
     },
-    process.env.JWT_ACCESS_SECRET as string,
-    process.env.JWT_ACCESS_SECRET_EXPIRESIN as string
+    config.jwt.access_secret as string,
+    config.jwt.access_secret_expires_in as string
   );
 
   const refreshToken = jwtHelpers.generateToken(
@@ -45,8 +34,8 @@ const loginUser = async (payload: { email: string; password: string }) => {
       email: userData.email,
       role: userData.role,
     },
-    process.env.JWT_REFRESH_SECRET as string,
-    process.env.JWT_REFRESH_SECRET_EXPIRESIN as string
+    config.jwt.refresh_secret as string,
+    config.jwt.refresh_secret_expires_in as string
   );
 
   return {
@@ -70,7 +59,7 @@ const refreshToken = async (token: string) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: decodedData.email,
-      status: UserStatus.ACTIVE
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -79,8 +68,8 @@ const refreshToken = async (token: string) => {
       email: userData.email,
       role: userData.role,
     },
-    process.env.JWT_ACCESS_SECRET as string,
-    process.env.JWT_ACCESS_SECRET_EXPIRESIN as string
+    config.jwt.access_secret as string,
+    config.jwt.access_secret_expires_in as string
   );
 
   return {
@@ -89,7 +78,43 @@ const refreshToken = async (token: string) => {
   };
 };
 
+const changePassword = async(user:any, payload:any) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user.email
+    }
+  })
+
+  const isCorrectPassword: boolean = await bcrypt.compare(
+    payload.oldPassword,
+    userData.password
+  );
+
+  if (!isCorrectPassword) {
+    throw new Error("Password incorrect!");
+  }
+
+  const hashedPassword: string = await bcrypt.hash(payload.newPassword, 12);
+
+  await prisma.user.update({
+    where: {
+      email: userData.email,
+      status: UserStatus.ACTIVE
+    }, 
+    data: {
+      password: hashedPassword,
+      needPasswordChange: false
+    }
+  })
+
+  return {
+    message: "Password changed successfully"
+  }
+
+}
+
 export const authService = {
   loginUser,
   refreshToken,
+  changePassword
 };
