@@ -1,108 +1,70 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { adminService } from "./admin.service";
 import pick from "../../../shared/pick";
 import { adminFilterableFields } from "./admin.constant";
 import sendResponse from "../../../shared/sendResponse";
 import { StatusCodes } from "http-status-codes";
+import catchAsync from "../../../shared/catchAsync";
 
-const getAllUserFromDB = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // const filters = req.query
-    const filters = pick(req.query, adminFilterableFields);
-    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-    console.log(options);
-    const result = await adminService.getAllUserFromDB(filters, options);
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Admins fetched Successfully!",
-      meta: result.meta,
-      data: result.data,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+const getAllUserFromDB = catchAsync(async (req, res) => {
+  // const filters = req.query
+  const filters = pick(req.query, adminFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+  console.log(options);
+  const result = await adminService.getAllUserFromDB(filters, options);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Admins fetched Successfully!",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
-const getUserByIdFromDB = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getUserByIdFromDB = catchAsync(async (req, res) => {
   const { id } = req.params;
-  try {
-    const result = await adminService.getUserByIdFromDB(id);
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Admin fetched Successfully!",
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  const result = await adminService.getUserByIdFromDB(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Admin fetched Successfully!",
+    data: result,
+  });
+});
 
-const updateUserIntoDB = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const updateUserIntoDB = catchAsync(async (req, res) => {
   const { id } = req.params;
-  try {
-    const result = await adminService.updateUserIntoDB(id, req.body);
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Admin updated Successfully!",
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  const result = await adminService.updateUserIntoDB(id, req.body);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Admin updated Successfully!",
+    data: result,
+  });
+});
 
-const deleteUserFromDB = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const deleteUserFromDB = catchAsync(async (req, res) => {
   const { id } = req.params;
-  try {
-    const result = await adminService.deleteUserFromDB(id);
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Admin deleted Successfully!",
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  const result = await adminService.deleteUserFromDB(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Admin deleted Successfully!",
+    data: result,
+  });
+});
 
-const softDeleteUserFromDB = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const softDeleteUserFromDB = catchAsync(async (req, res) => {
   const { id } = req.params;
-  try {
-    const result = await adminService.softDeleteUserFromDB(id);
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Admin deleted Successfully!",
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+
+  const result = await adminService.softDeleteUserFromDB(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Admin deleted Successfully!",
+    data: result,
+  });
+});
 
 export const adminController = {
   getAllUserFromDB,
