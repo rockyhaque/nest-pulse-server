@@ -32,7 +32,7 @@ const auth = (...roles: string[]) => {
         throw new ApiError(StatusCodes.FORBIDDEN, "Access denied. Forbidden.");
       }
       next();
-      console.log(verifiedUser);
+      // console.log(verifiedUser);
     } catch (error) {
       next(error);
     }

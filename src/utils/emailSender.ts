@@ -20,7 +20,7 @@ const emailSender = async (email: string, html: string) => {
     html,
   });
 
-  console.log("Message sent: %s", info.messageId);
+  // console.log("Message sent: %s", info.messageId);
 };
 
 export default emailSender;

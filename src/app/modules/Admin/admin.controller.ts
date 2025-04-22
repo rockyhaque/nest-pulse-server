@@ -10,7 +10,7 @@ const getAllUserFromDB = catchAsync(async (req, res) => {
   // const filters = req.query
   const filters = pick(req.query, adminFilterableFields);
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-  console.log(options);
+  // console.log(options);
   const result = await adminService.getAllUserFromDB(filters, options);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
