@@ -1,33 +1,33 @@
 import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import { specialtiesService } from "./specialties.service";
 import { Request, Response } from "express";
+import { specialitiesService } from "./specialities.service";
 
 const insertIntoDB = catchAsync(async (req, res) => {
 
-    const result = await specialtiesService.insertIntoDB(req);
+    const result = await specialitiesService.insertIntoDB(req);
     sendResponse(res, {
       statusCode: StatusCodes.OK,
       success: true,
-      message: "Specialties added Successfully!",
+      message: "Specialities added Successfully!",
       data: result,
     });
   });
   
   const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-    const result = await specialtiesService.getAllFromDB();
+    const result = await specialitiesService.getAllFromDB();
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
-        message: 'Specialties data fetched successfully',
+        message: 'Specialities data fetched successfully',
         data: result,
     });
 });
 
 const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await specialtiesService.deleteFromDB(id);
+    const result = await specialitiesService.deleteFromDB(id);
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
@@ -36,7 +36,7 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-  export const specialtiesController = {
+  export const specialitiesController = {
     insertIntoDB,
     getAllFromDB,
     deleteFromDB

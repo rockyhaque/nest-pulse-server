@@ -60,7 +60,7 @@ model Doctor {
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   user                User                @relation(fields: [email], references: [email])
-  doctorSpecialties   DoctorSpecialties[]
+  doctorSpecialities   DoctorSpecialities[]
 
   @@map("doctors")
 }
@@ -83,28 +83,28 @@ model Patient {
   @@map("patients")
 }
 
-//---------------------- Specialties Table---------------------
+//---------------------- Specialities Table---------------------
 
-model Specialties {
+model Specialities {
   id                String              @id @default(uuid())
   title             String
   icon              String
-  doctorSpecialties DoctorSpecialties[]
+  doctorSpecialities DoctorSpecialities[]
 
-  @@map("specialties")
+  @@map("specialities")
 }
 
-//---------------------- Doctor Specialties Table---------------------
+//---------------------- Doctor Specialities Table---------------------
 
-model DoctorSpecialties {
-  specialtiesId String
-  specialties   Specialties @relation(fields: [specialtiesId], references: [id])
+model DoctorSpecialities {
+  specialitiesId String
+  specialities   Specialities @relation(fields: [specialitiesId], references: [id])
   doctorId      String
   doctor        Doctor      @relation(fields: [doctorId], references: [id])
 
   // Composite Key
-  @@id([specialtiesId, doctorId])
-  @@map("doctor_specialties")
+  @@id([specialitiesId, doctorId])
+  @@map("doctor_specialities")
 }
 
 //---------------------- enum---------------------
