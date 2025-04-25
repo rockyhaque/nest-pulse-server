@@ -31,7 +31,7 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
-        message: 'Specialty deleted successfully',
+        message: 'Speciality deleted successfully',
         data: result,
     });
 });
