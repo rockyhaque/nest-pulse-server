@@ -4,6 +4,7 @@ import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import { StatusCodes } from "http-status-codes";
 import { SSLService } from "../SSL/ssl.service";
+import { PaymentStatus } from "@prisma/client";
 
 const initPayment = async (appointmentId: string) => {
   try {
@@ -43,21 +44,52 @@ const initPayment = async (appointmentId: string) => {
   }
 };
 
-const validatePayment = async(payload: any) =>{
-    if(!payload || !payload.status || !(payload.status === "VALID")){
-        return {
-            message: "Invalid Payment"
-        }
-    }
+const validatePayment = async (payload: any) => {
+  // * Production use only
+  // if (!payload || !payload.status || !(payload.status === "VALID")) {
+  //   return {
+  //     message: "Invalid Payment",
+  //   };
+  // }
 
-    const response = await axios({
-        method: "GET",
-        url: `${config.ssl.sslValidationApi}?val_id=${payload.val_id}&store_id=${config.ssl.storeId}&store_passwd=${config.ssl.storePass}&formate=json`
-    })
+  // const response = await SSLService.validatetPayment(payload);
 
-}
+  // if (response?.status !== "VALID") {
+  //   return {
+  //     message: "Payment Failed",
+  //   };
+  // }
+
+  // * Local use only
+  const response = payload;
+
+  await prisma.$transaction(async (tx) => {
+    const updatedPaymentData = await tx.payment.update({
+      where: {
+        transactionId: response?.tran_id,
+      },
+      data: {
+        status: PaymentStatus.PAID,
+        paymentGatewayData: response,
+      },
+    });
+
+    await tx.appointment.update({
+      where: {
+        id: updatedPaymentData.appointmentId,
+      },
+      data: {
+        paymentStatus: PaymentStatus.PAID
+      },
+    });
+  });
+
+  return {
+    message: "Payment Success"
+  }
+};
 
 export const PaymentService = {
   initPayment,
-  validatePayment
+  validatePayment,
 };
