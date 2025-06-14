@@ -3,7 +3,9 @@ import { TAuthUser } from "../../interfaces/common";
 import { v4 as uuidv4 } from "uuid";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { Prisma, UserRole } from "@prisma/client";
+import { AppointmentStatus, Prisma, UserRole } from "@prisma/client";
+import ApiError from "../../errors/ApiError";
+import { StatusCodes } from "http-status-codes";
 
 const createAppointment = async (user: TAuthUser, payload: any) => {
   const patientData = await prisma.patient.findUniqueOrThrow({
@@ -220,8 +222,47 @@ const getAllFromDB = async (filters: any, options: IPaginationOptions) => {
   };
 };
 
+const changeAppointmentStatus = async (
+  appointmentId: string,
+  status: AppointmentStatus,
+  user: TAuthUser
+) => {
+  const appointmentData = await prisma.appointment.findUnique({
+    where: {
+      id: appointmentId,
+    },
+    include: {
+      doctor: true
+    }
+  });
+
+  
+  if (!appointmentData) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Appointment not found");
+  }
+
+  if(user?.role === UserRole.DOCTOR){
+    if(!(user.email === appointmentData.doctor.email)){
+      throw new ApiError(StatusCodes.BAD_REQUEST, "This appointment is not yours!")
+    }
+  }
+
+
+  const result = await prisma.appointment.update({
+    where: {
+      id: appointmentId,
+    },
+    data: {
+      status,
+    },
+  });
+
+  return result;
+};
+
 export const AppointmentService = {
   createAppointment,
   getMyAppointment,
   getAllFromDB,
+  changeAppointmentStatus,
 };
