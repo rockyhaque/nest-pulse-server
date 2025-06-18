@@ -6,6 +6,11 @@ import { IPaginationOptions } from "../../interfaces/pagination";
 import { TAuthUser } from "../../interfaces/common";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 
+const convertDateTime = async (date: Date) => {
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() + offset);
+};
+
 const inserIntoDB = async (payload: ISchedule): Promise<Schedule[]> => {
   const { startDate, endDate, startTime, endTime } = payload;
 
@@ -18,29 +23,37 @@ const inserIntoDB = async (payload: ISchedule): Promise<Schedule[]> => {
 
   while (currentDate <= lastDate) {
     const startDateTime = new Date(
-      //   addMinutes(
-      addHours(
-        `${format(currentDate, "yyyy-MM-dd")}`,
-        Number(startTime.split(":")[0])
+      addMinutes(
+        addHours(
+          `${format(currentDate, "yyyy-MM-dd")}`,
+          Number(startTime.split(":")[0])
+        ),
+        Number(startTime.split(":")[1])
       )
-      //     Number(startTime.split(":")[1])
-      //   )
     );
 
     const endDateTime = new Date(
-      //   addMinutes(
-      addHours(
-        `${format(currentDate, "yyyy-MM-dd")}`,
-        Number(endTime.split(":")[0])
+      addMinutes(
+        addHours(
+          `${format(currentDate, "yyyy-MM-dd")}`,
+          Number(endTime.split(":")[0])
+        ),
+        Number(startTime.split(":")[1])
       )
-      //     Number(startTime.split(":")[1])
-      //   )
     );
 
     while (startDateTime < endDateTime) {
+      // const scheduleData = {
+      //   startDateTime: startDateTime,
+      //   endDateTime: addMinutes(startDateTime, intervalTime),
+      // };
+
+      const s = await convertDateTime(startDateTime);
+      const e = await convertDateTime(addMinutes(startDateTime, intervalTime));
+
       const scheduleData = {
-        startDateTime: startDateTime,
-        endDateTime: addMinutes(startDateTime, intervalTime),
+        startDateTime: s,
+        endDateTime: e,
       };
 
       const existingSchedule = await prisma.schedule.findFirst({
@@ -158,18 +171,18 @@ const getAllFromDB = async (
 
 const getByIdFromDB = async (id: string): Promise<Schedule | null> => {
   const result = await prisma.schedule.findUnique({
-      where: {
-          id,
-      },
+    where: {
+      id,
+    },
   });
   return result;
 };
 
 const deleteFromDB = async (id: string): Promise<Schedule> => {
   const result = await prisma.schedule.delete({
-      where: {
-          id,
-      },
+    where: {
+      id,
+    },
   });
   return result;
 };
@@ -178,5 +191,5 @@ export const ScheduleService = {
   inserIntoDB,
   getAllFromDB,
   getByIdFromDB,
-  deleteFromDB
+  deleteFromDB,
 };
